@@ -102,6 +102,8 @@ def stringfirst(raw_metric):
 def stringlast(raw_metric):
     return {"type": "stringLast", "fieldName": raw_metric}
 
+def QuantilesDoublesSketch(raw_column, k=128):
+    return {"type": "quantilesDoublesSketch", "fieldName": raw_column, "k": k}
 
 def build_aggregators(agg_input):
     return [_build_aggregator(name, kwargs) for (name, kwargs) in agg_input.items()]

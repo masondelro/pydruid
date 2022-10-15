@@ -220,3 +220,100 @@ class ThetaSketchEstimate(Postaggregator):
             "field": field,
         }
         self.name = "thetasketchestimate"
+
+class QuantilesDoublesSketchToQuantile(Postaggregator):
+    def __init__(self, name: str, field_name: str, fraction):
+        self.post_aggregator = {
+            "type": "quantilesDoublesSketchToQuantile",
+            "name": name,
+            "fraction": fraction,
+            "field": {
+                "fieldName": field_name,
+                "name": field_name,
+                "type": "fieldAccess",
+            },
+        }
+
+class QuantilesDoublesSketchToQuantiles(Postaggregator):
+    def __init__(self, name: str, field_name: str, fractions):
+        self.post_aggregator = {
+            "type": "quantilesDoublesSketchToQuantiles",
+            "name": name,
+            "fractions": fractions,
+            "field": {
+                "fieldName": field_name,
+                "name": field_name,
+                "type": "fieldAccess",
+            },
+        }
+
+class QuantilesDoublesSketchToHistogram(Postaggregator):
+    def __init__(self, name: str, field_name: str, splitPoints):
+        self.post_aggregator = {
+            "type": "quantilesDoublesSketchToHistogram",
+            "name": name,
+            "splitPoints": splitPoints,
+            "field": {
+                "fieldName": field_name,
+                "name": field_name,
+                "type": "fieldAccess",
+            },
+        }
+
+class QuantilesDoublesSketchToHistogramWithBin(Postaggregator):
+    def __init__(self, name: str, field_name: str, numBins):
+        self.post_aggregator = {
+            "type": "quantilesDoublesSketchToHistogram",
+            "name": name,
+            "numBins": numBins,
+            "field": {
+                "fieldName": field_name,
+                "name": field_name,
+                "type": "fieldAccess",
+            },
+        }
+
+class QuantilesDoublesSketchToRank(Postaggregator):
+    def __init__(self, name: str, field_name: str, value):
+        self.post_aggregator = {
+            "type": "quantilesDoublesSketchToRank",
+            "name": name,
+            "value": value,
+            "field": {
+                "fieldName": field_name,
+                "name": field_name,
+                "type": "fieldAccess",
+            },
+        }
+
+class QuantilesDoublesSketchToCDF(Postaggregator):
+    def __init__(self, name: str, field_name: str, split_points):
+        self.post_aggregator = {
+            "type": "quantilesDoublesSketchToCDF",
+            "name": name,
+            "splitPoints": split_points,
+            "field": {
+                "fieldName": field_name,
+                "name": field_name,
+                "type": "fieldAccess",
+            },
+        }
+
+class QuantilesDoublesSketchToString(Postaggregator):
+    def __init__(self, name: str, field_name: str):
+        self.post_aggregator = {
+            "type": "quantilesDoublesSketchToString",
+            "name": name,
+            "field": {
+                "fieldName": field_name,
+                "name": field_name,
+                "type": "fieldAccess",
+            },
+        }
+class Expression(Postaggregator):
+    def __init__(self, name, expression):
+        self.post_aggregator = {
+            "type": "expression",
+            "name": name,
+            "expression": expression
+        }

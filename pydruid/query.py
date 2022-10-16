@@ -248,8 +248,16 @@ class QueryBuilder(object):
             )
         if isinstance(datasource, str):
             return datasource
-        else:
+        elif isinstance(datasource, list):
             return {"type": "union", "dataSources": datasource}
+        else :
+            if "type" not in datasource:
+                raise ValueError("Not able to recognize type of data source! Please pass type field.")
+            type = datasource["type"]
+            if type == "join":
+                return datasource
+            else:
+                raise ValueError("Data source of type " + type + " are not supported!")
 
     @staticmethod
     def validate_query(query_type, valid_parts, args):

@@ -256,6 +256,8 @@ class QueryBuilder(object):
             type = datasource["type"]
             if type == "join":
                 return datasource
+            elif type == "query":
+                return datasource
             else:
                 raise ValueError("Data source of type " + type + " are not supported!")
 

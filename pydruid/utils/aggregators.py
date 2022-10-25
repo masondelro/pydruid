@@ -94,6 +94,18 @@ def javascript(columns_list, fn_aggregate, fn_combine, fn_reset):
         "fnReset": fn_reset,
     }
 
+def expression(name, fields, initialValue, initialCombineValue, fold, combine, maxSizeBytes):
+    agg = {}
+    agg["type"] = "expression"
+    agg["name"] = name
+    agg["fields"] = fields
+    agg["accumulatorIdentifier"]  = "__acc"
+    agg["initialValue"] = initialValue
+    agg["initialCombineValue"] = initialCombineValue
+    agg["fold"] = fold
+    agg["combine"] = combine
+    agg["maxSizeBytes"] = maxSizeBytes
+    return agg
 
 def stringfirst(raw_metric):
     return {"type": "stringFirst", "fieldName": raw_metric}

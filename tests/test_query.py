@@ -1,4 +1,4 @@
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 #
 # Copyright 2016 Metamarkets Group Inc.
 #
@@ -16,14 +16,13 @@
 #
 
 import csv
-import os
 
 import pandas
 import pytest
 from pandas.testing import assert_frame_equal
 
 from pydruid.query import Query, QueryBuilder
-from pydruid.utils import aggregators, filters, having, postaggregator
+from pydruid.utils import aggregators, filters, having, postaggregator, virtualcolumns
 
 
 def create_query_with_results():
@@ -225,6 +224,80 @@ class TestQueryBuilder:
 
         # then
         assert subquery_dict == expected_query_dict
+
+    def test_build_join_query(self):
+        """ Tests building a query with a join """
+        expected_query_dict = {
+            "queryType": "groupBy",
+            "dataSource": {
+                "type": "join",
+                "joinType": "INNER",
+                "left": {
+                    "type": "query",
+                    "query": {
+                        "dataSource": "things",
+                        "dimensions": ["id", "a"],
+                        "queryType": "groupBy",
+                    },
+                },
+                "right": {
+                    "type": "query",
+                    "query": {
+                        "dataSource": "other_things",
+                        "dimensions": ["id", "b"],
+                        "queryType": "groupBy",
+                    },
+                },
+                "rightPrefix": "other",
+                "condition": "id = other_id",
+            },
+            "dimensions": ["id"],
+        }
+
+        builder = QueryBuilder()
+
+        left = builder.subquery({"datasource": "things", "dimensions": ["id", "a"]})
+
+        right = builder.subquery(
+            {"datasource": "other_things", "dimensions": ["id", "b"]}
+        )
+
+        joined = joins.InnerJoin(
+            left=left, right=right, right_prefix="other", condition="id = other_id"
+        )
+
+        query = builder.groupby({"datasource": joined, "dimensions": ["id"]})
+
+        # then
+        assert query.query_dict == expected_query_dict
+
+    def test_topn_virtual_columns(self) -> None:
+        builder = QueryBuilder()
+
+        query_kwargs = {
+            "datasource": "things",
+            "intervals": "2013-10-23/2013-10-26",
+            "granularity": "all",
+            "dimension": "virtual_id",
+            "threshold": 5,
+            "metric": "views",
+            "virtual_columns": [
+                virtualcolumns.VirtualColumnSpec(
+                    "virtual_id", "concat('ns:' + real_id)", 'STRING'
+                )
+            ]
+        }
+
+        query = builder.topn(query_kwargs)
+        assert query.query_dict['queryType'] == 'topN'
+
+        expected_virtual_columns = [
+            {
+                'type': 'expression', 'name': 'virtual_id',
+                'expression': "concat('ns:' + real_id)", 'outputType': 'STRING'
+            }
+        ]
+        assert query.query_dict['virtualColumns'] == expected_virtual_columns
 
 
 class TestQuery:

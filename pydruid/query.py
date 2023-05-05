@@ -21,8 +21,10 @@ from pydruid.utils.aggregators import build_aggregators
 from pydruid.utils.dimensions import build_dimension
 from pydruid.utils.filters import Filter
 from pydruid.utils.having import Having
+from pydruid.utils.joins import Join
 from pydruid.utils.postaggregator import Postaggregator
 from pydruid.utils.query_utils import UnicodeWriter
+from pydruid.utils.virtualcolumns import build_virtual_column
 
 
 class Query(MutableSequence):
@@ -241,13 +243,16 @@ class QueryBuilder(object):
                 and all([isinstance(x, str) for x in datasource])
             )
             or isinstance(datasource, dict)
+            or isinstance(datasource, Join)
         ):
             raise ValueError(
                 "Datasource definition not valid. Must be string or "
-                "dict or list of strings"
+                "dict or list of strings or Join"
             )
         if isinstance(datasource, str):
             return datasource
+        elif isinstance(datasource, Join):
+            return Join.build_join(datasource)
         elif isinstance(datasource, list):
             return {"type": "union", "dataSources": datasource}
         else :
@@ -320,6 +325,10 @@ class QueryBuilder(object):
                 query_dict[key] = build_dimension(val)
             elif key == "dimensions":
                 query_dict[key] = [build_dimension(v) for v in val]
+            elif key in ("virtualColumns", "virtual_columns"):
+                query_dict["virtualColumns"] = [
+                    build_virtual_column(virtual_col) for virtual_col in val
+                ]
             else:
                 query_dict[key] = val
 
@@ -351,6 +360,7 @@ class QueryBuilder(object):
             "threshold",
             "metric",
             "virtualColumns",
+            "virtual_columns",
         ]
         self.validate_query(query_type, valid_parts, args)
         return self.build_query(query_type, args)
@@ -375,6 +385,7 @@ class QueryBuilder(object):
             "post_aggregations",
             "intervals",
             "virtualColumns",
+            "virtual_columns",
         ]
         self.validate_query(query_type, valid_parts, args)
         return self.build_query(query_type, args)
@@ -401,6 +412,7 @@ class QueryBuilder(object):
             "dimensions",
             "limit_spec",
             "virtualColumns",
+            "virtual_columns",
         ]
         self.validate_query(query_type, valid_parts, args)
         return self.build_query(query_type, args)
@@ -526,7 +538,7 @@ class QueryBuilder(object):
             "intervals",
             "limit",
             "order",
-            "virtualColumns"
+            "virtual_columns",
         ]
         self.validate_query(query_type, valid_parts, args)
         return self.build_query(query_type, args)
